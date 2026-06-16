@@ -1667,7 +1667,7 @@ function doLogin(){
   if(!e||!p){err.textContent='Escribe tu correo y contraseña.';err.style.display='block';return;}
   err.style.display='none';
   loading(true,'Verificando...');
-  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'login',payload:{correo:e,password:p}})})
+  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'login',payload:{correo:e,password:p}}),redirect:'follow'})
     .then(function(r){return r.json();})
     .then(function(d){
       loading(false);
@@ -1718,7 +1718,7 @@ function validarPin(pin){
   var pinErr=document.getElementById('pin-err');
   pinErr.style.display='none';
   loading(true,'Verificando PIN...');
-  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'validarPin',payload:{pin:pin,sucursal:sesion.sucursal}})})
+  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'validarPin',payload:{pin:pin,sucursal:sesion.sucursal}}),redirect:'follow'})
     .then(function(r){return r.json();})
     .then(function(d){
       loading(false);
@@ -2273,7 +2273,7 @@ function _guardarCotSheets(cot){
     cotizacion:{paquete_base:cot.items[0]?cot.items[0].art:'',precio_paquete_base:cot.items[0]?cot.items[0].precio:0,total_estimado:cot.total},
     venta:null
   };
-  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'guardarOperacionPOS',payload:payload})})
+  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'guardarOperacionPOS',payload:payload}),redirect:'follow'})
     .then(function(r){return r.json();})
     .then(function(d){if(d&&d.ok)toast('Cotizacion guardada en Sheets','ok');})
     .catch(function(){});
@@ -4326,7 +4326,7 @@ function procesarPago(){
     mostrarRecibo(total,fecha);
   }
   loading(true,'Guardando en Google Sheets...');
-  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'guardarOperacionPOS',payload:buildPayload('venta')})})
+  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'guardarOperacionPOS',payload:buildPayload('venta')}),redirect:'follow'})
     .then(function(r){return r.json();}).then(function(d){loading(false);toast(d&&d.ok?'✓ Guardado en Sheets':'Recibo guardado','ok');})
     .catch(function(){loading(false);toast('Sin conexión — guardado local');});
 }
