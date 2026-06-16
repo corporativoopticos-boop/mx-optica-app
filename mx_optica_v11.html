@@ -1668,8 +1668,9 @@ function doLogin(){
   err.style.display='none';
   loading(true,'Verificando...');
   var url=SCRIPT_URL+'?action=login&correo='+encodeURIComponent(e)+'&password='+encodeURIComponent(p)+'&t='+Date.now();
-  fetch(url,{redirect:'follow'})
-    .then(function(r){return r.json();})
+  fetch(url)
+    .then(function(r){return r.text();})
+    .then(function(t){return JSON.parse(t);})
     .then(function(d){
       loading(false);
       if(d&&d.ok){
@@ -1720,8 +1721,9 @@ function validarPin(pin){
   pinErr.style.display='none';
   loading(true,'Verificando PIN...');
   var url=SCRIPT_URL+'?action=validarPin&pin='+encodeURIComponent(pin)+'&sucursal='+encodeURIComponent(sesion.sucursal)+'&t='+Date.now();
-  fetch(url,{redirect:'follow'})
-    .then(function(r){return r.json();})
+  fetch(url)
+    .then(function(r){return r.text();})
+    .then(function(t){return JSON.parse(t);})
     .then(function(d){
       loading(false);
       if(d&&d.ok){
