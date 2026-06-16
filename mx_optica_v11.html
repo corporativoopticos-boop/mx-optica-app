@@ -1667,7 +1667,8 @@ function doLogin(){
   if(!e||!p){err.textContent='Escribe tu correo y contraseña.';err.style.display='block';return;}
   err.style.display='none';
   loading(true,'Verificando...');
-  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'login',payload:{correo:e,password:p}}),redirect:'follow'})
+  var url=SCRIPT_URL+'?action=login&correo='+encodeURIComponent(e)+'&password='+encodeURIComponent(p)+'&t='+Date.now();
+  fetch(url,{redirect:'follow'})
     .then(function(r){return r.json();})
     .then(function(d){
       loading(false);
@@ -1718,7 +1719,8 @@ function validarPin(pin){
   var pinErr=document.getElementById('pin-err');
   pinErr.style.display='none';
   loading(true,'Verificando PIN...');
-  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'validarPin',payload:{pin:pin,sucursal:sesion.sucursal}}),redirect:'follow'})
+  var url=SCRIPT_URL+'?action=validarPin&pin='+encodeURIComponent(pin)+'&sucursal='+encodeURIComponent(sesion.sucursal)+'&t='+Date.now();
+  fetch(url,{redirect:'follow'})
     .then(function(r){return r.json();})
     .then(function(d){
       loading(false);
@@ -1733,7 +1735,6 @@ function validarPin(pin){
       }
     })
     .catch(function(){
-      // Sin conexión: permitir modo local/offline
       loading(false);
       toast('Sin conexión — modo local','ok');
       cargarCatalogos();
