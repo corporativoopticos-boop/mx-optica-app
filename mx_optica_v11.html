@@ -1662,31 +1662,40 @@ function aplicarAsesorASesion(asesor){
   sesion.sucursalesPermitidas=asesor.sucursales_permitidas; // null = todas
 }
 
+function gasGet(url,onOk,onErr){
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',url,true);
+  xhr.onload=function(){
+    try{onOk(JSON.parse(xhr.responseText));}
+    catch(e){onErr();}
+  };
+  xhr.onerror=function(){onErr();};
+  xhr.ontimeout=function(){onErr();};
+  xhr.timeout=15000;
+  xhr.send();
+}
+
 function doLogin(){
   var e=document.getElementById('lemail').value.trim(),p=document.getElementById('lpass').value.trim(),err=document.getElementById('login-err');
   if(!e||!p){err.textContent='Escribe tu correo y contraseña.';err.style.display='block';return;}
   err.style.display='none';
   loading(true,'Verificando...');
   var url=SCRIPT_URL+'?action=login&correo='+encodeURIComponent(e)+'&password='+encodeURIComponent(p)+'&t='+Date.now();
-  fetch(url)
-    .then(function(r){return r.text();})
-    .then(function(t){return JSON.parse(t);})
-    .then(function(d){
-      loading(false);
-      if(d&&d.ok){
-        aplicarAsesorASesion(d.asesor);
-        guardarDispositivo(d.asesor);
-        go('tienda');renderTiendas();
-      }else{
-        err.textContent=(d&&d.error)||'Correo o contraseña incorrectos.';
-        err.style.display='block';
-      }
-    })
-    .catch(function(){
-      loading(false);
-      err.textContent='Sin conexión. Intenta de nuevo.';
+  gasGet(url,function(d){
+    loading(false);
+    if(d&&d.ok){
+      aplicarAsesorASesion(d.asesor);
+      guardarDispositivo(d.asesor);
+      go('tienda');renderTiendas();
+    }else{
+      err.textContent=(d&&d.error)||'Correo o contraseña incorrectos.';
       err.style.display='block';
-    });
+    }
+  },function(){
+    loading(false);
+    err.textContent='Sin conexión. Intenta de nuevo.';
+    err.style.display='block';
+  });
 }
 
 function renderTiendas(){
@@ -1721,26 +1730,22 @@ function validarPin(pin){
   pinErr.style.display='none';
   loading(true,'Verificando PIN...');
   var url=SCRIPT_URL+'?action=validarPin&pin='+encodeURIComponent(pin)+'&sucursal='+encodeURIComponent(sesion.sucursal)+'&t='+Date.now();
-  fetch(url)
-    .then(function(r){return r.text();})
-    .then(function(t){return JSON.parse(t);})
-    .then(function(d){
-      loading(false);
-      if(d&&d.ok){
-        aplicarAsesorASesion(d.asesor);
-        guardarDispositivo(d.asesor);
-        var sucEl=document.getElementById('pin-suc');if(sucEl&&sesion.sucursal)sucEl.textContent=sesion.sucursal;
-        cargarCatalogos();
-      }else{
-        pinErr.textContent=(d&&d.error)||'PIN incorrecto.';
-        pinErr.style.display='block';
-      }
-    })
-    .catch(function(){
-      loading(false);
-      toast('Sin conexión — modo local','ok');
+  gasGet(url,function(d){
+    loading(false);
+    if(d&&d.ok){
+      aplicarAsesorASesion(d.asesor);
+      guardarDispositivo(d.asesor);
+      var sucEl=document.getElementById('pin-suc');if(sucEl&&sesion.sucursal)sucEl.textContent=sesion.sucursal;
       cargarCatalogos();
-    });
+    }else{
+      pinErr.textContent=(d&&d.error)||'PIN incorrecto.';
+      pinErr.style.display='block';
+    }
+  },function(){
+    loading(false);
+    toast('Sin conexión — modo local','ok');
+    cargarCatalogos();
+  });
 }
 
 function cargarCatalogos(){
