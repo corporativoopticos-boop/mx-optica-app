@@ -1663,16 +1663,27 @@ function aplicarAsesorASesion(asesor){
 }
 
 function gasGet(url,onOk,onErr){
-  var xhr=new XMLHttpRequest();
-  xhr.open('GET',url,true);
-  xhr.onload=function(){
-    try{onOk(JSON.parse(xhr.responseText));}
-    catch(e){onErr();}
+  var cbName='_gasCallback_'+Date.now();
+  var script=document.createElement('script');
+  var timer=setTimeout(function(){
+    window[cbName]=null;
+    document.body.removeChild(script);
+    onErr();
+  },15000);
+  window[cbName]=function(data){
+    clearTimeout(timer);
+    window[cbName]=null;
+    document.body.removeChild(script);
+    onOk(data);
   };
-  xhr.onerror=function(){onErr();};
-  xhr.ontimeout=function(){onErr();};
-  xhr.timeout=15000;
-  xhr.send();
+  script.src=url+'&callback='+cbName;
+  script.onerror=function(){
+    clearTimeout(timer);
+    window[cbName]=null;
+    try{document.body.removeChild(script);}catch(e){}
+    onErr();
+  };
+  document.body.appendChild(script);
 }
 
 function doLogin(){
